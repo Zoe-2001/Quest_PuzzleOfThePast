@@ -1,0 +1,115 @@
+<!--Saved by Quest 5.8.6836.13983-->
+<asl version="580">
+  <include ref="English.aslx" />
+  <include ref="Core.aslx" />
+  <game name="PuzzleOfThePast">
+    <gameid>7f81b3c4-5c61-4a13-92fa-30173aea36b2</gameid>
+    <version>1.0</version>
+    <firstpublished>2023</firstpublished>
+  </game>
+  <object name="room">
+    <inherit name="editor_room" />
+    <isroom />
+    <object name="Office">
+      <inherit name="editor_room" />
+      <object name="mails">
+        <inherit name="editor_object" />
+        <inherit name="container_closed" />
+        <attr name="feature_container" type="boolean">false</attr>
+        <alias>the mails</alias>
+        <look type="script">
+          MakeObjectVisible (new mail)
+          msg ("As a detective, you always receive various types of mail—about missing dogs, lost valuables, and lovers' betrayals. You absentmindedly skim through a few of them. Just as you're about to turn away, you suddenly notice a brand new letter atop the pile.")
+          msg ("For some inexplicable reason, this letter stands out in a remarkable way, and your breath grows heavy as you lay eyes on it... Perhaps you should take a closer look at this new piece of mail.")
+        </look>
+      </object>
+      <object name="table">
+        <inherit name="editor_object" />
+        <look>The table, an island of stillness in the chaos of the manor, is adorned with a fine layer of dust. Its polished wood surface, now marred by scratches and stains, once hosted gatherings of laughter and conversation but now stands as a silent witness to the passage of time.</look>
+      </object>
+      <object name="safe">
+        <inherit name="editor_object" />
+        <inherit name="container_closed" />
+        <feature_container />
+        <hidechildren />
+        <listchildren />
+        <visible type="boolean">false</visible>
+        <look>The safe looms like a sentinel, guarding its secrets with an imposing presence. Its steel surface bears the scars of time and attempted break-ins, yet the combination lock remains a daunting puzzle waiting to be solved.</look>
+        <object name="gun">
+          <inherit name="editor_object" />
+          <attr name="feature_usegive" type="boolean">false</attr>
+          <take />
+          <drop type="boolean">false</drop>
+          <ontake type="script">
+            msg ("With your safety and resolve in mind, you chose to bring your firearm, recognizing it as a crucial companion on this quest to unearth the truth about your past and the fate of your dear friend.")
+          </ontake>
+          <look> The gun lies cold and menacing, its metallic surface reflecting dim light in the dimly lit room. Each detail is meticulously crafted, from the worn grip to the intricately etched barrel, hinting at the power it once wielded.</look>
+          <not_all />
+        </object>
+        <object name="rusted key">
+          <inherit name="editor_object" />
+          <take />
+          <drop type="boolean">false</drop>
+          <ontake type="script">
+            if (GetBoolean(new mail, "looked at")) {
+              msg ("Its true purpose remains a tantalizing mystery, but a nagging feeling persists—could it potentially unlock a crucial piece of this unfolding puzzle? With uncertainty and curiosity as your guides, you decide to bring the key along, hoping it might reveal its significance as you journey deeper into the enigmatic past of the Sunshine Orphanage.")
+            }
+          </ontake>
+          <not_all />
+          <look>The rusted key exudes an air of mystery, its jagged edges hinting at a tumultuous past. Layers of corrosion have dulled its once-shiny surface, leaving only a faint glimmer of the metal beneath.</look>
+        </object>
+      </object>
+      <object name="player">
+        <inherit name="editor_object" />
+        <inherit name="editor_player" />
+      </object>
+      <object name="new mail">
+        <inherit name="editor_object" />
+        <visible type="boolean">false</visible>
+        <look type="script">
+          msg ("You slowly unfold the letter, and its contents read, \"Hello, perhaps you don't know me. But don't you want to know what happened to your childhood friend? Come to the address on the back to uncover the truth—provided you have the courage.\"")
+          msg ("Memories of your childhood friend rush back. He was your closest confidant during your lonely and pitiful life in the orphanage. The two of you shared secrets, dreams, and moments of solace amid the stark surroundings. Then, one fateful day, he vanished without a trace—a memory etched deeply into your heart, even though nobody believed your story or lent an ear to your pleas for help. The orphanage, it seemed, was destined for doom, eventually succumbing to a devastating fire that erased any remaining trace of your friend. ")
+          msg ("As you fixate on the ominous address of Sunshine Orphanage, the weight of the situation becomes undeniable, and you decide that bringing your gun along is a prudent choice. The thought lingers that the author of this enigmatic letter might indeed be the very person responsible for your childhood friend's disappearance at the orphanage. A sense of apprehension shrouds your thoughts as you contemplate the significance of the rusted key in your safe; it seems to hold an unspoken importance for this impending journey. With a resolute determination to confront your past and unveil your dear friend's fate, you are convinced that gathering these essentials is essential before embarking on this quest.")
+          SetObjectFlagOn (new mail, "looked at")
+          MakeObjectVisible (safe)
+          msg ("Thankfully, you are well-acquainted with the password to your safe. With confidence, you anticipate finding both the gun and the enigmatic rusted key safely stored inside.")
+        </look>
+        <drop type="boolean">false</drop>
+        <take type="boolean">false</take>
+      </object>
+      <exit alias="out" to="Abandoned Building">
+        <runscript />
+        <script type="script">
+          if (not GetBoolean(new mail, "looked at")) {
+            msg ("As a detective, you rarely venture out without an intriguing case to pursue. The stack of letters in the room might just offer you a compelling reason to leave. ")
+          }
+          else {
+            if (not Got(gun)) {
+              msg ("You realize, with a sudden jolt of panic, that you forgot to take the gun with you. ")
+            }
+            else {
+              if (not Got(rusted key)) {
+                msg ("You think you should take the rusted key with you, even though its purpose remains a mystery.")
+              }
+            }
+            MoveObject (player, Abandoned Building)
+          }
+        </script>
+        <locked type="boolean">false</locked>
+        <visible />
+      </exit>
+    </object>
+    <object name="Abandoned Building">
+      <inherit name="editor_room" />
+      <alias>building</alias>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <prefix>an</prefix>
+      <beforeenter type="script">
+        msg ("You called a cab, and went on this quest.")
+      </beforeenter>
+      <enter type="script">
+        msg ("Here is the sunshine or")
+      </enter>
+    </object>
+  </object>
+</asl>
