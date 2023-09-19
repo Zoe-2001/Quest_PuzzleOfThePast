@@ -12,9 +12,12 @@
     <isroom />
     <object name="Office">
       <inherit name="editor_room" />
+      <beforeenter type="script">
+        picture ("office.png")
+        msg ("Welcome to your charmingly disheveled office! It's where you kickstart your day, sifting through a sea of intriguing cases. Sure, the place might resemble a tornado's aftermath, with papers adrift like lost sailors, but who's keeping score? It's not chaos; it's character! This mayhem is your modus operandi, your unique lifestyle, and you wouldn't have it any other way.")
+      </beforeenter>
       <object name="mails">
         <inherit name="editor_object" />
-        <inherit name="container_closed" />
         <attr name="feature_container" type="boolean">false</attr>
         <alias>the mails</alias>
         <look type="script">
@@ -22,6 +25,7 @@
           msg ("As a detective, you always receive various types of mail—about missing dogs, lost valuables, and lovers' betrayals. You absentmindedly skim through a few of them. Just as you're about to turn away, you suddenly notice a brand new letter atop the pile.")
           msg ("For some inexplicable reason, this letter stands out in a remarkable way, and your breath grows heavy as you lay eyes on it... Perhaps you should take a closer look at this new piece of mail.")
         </look>
+        <drop type="boolean">false</drop>
       </object>
       <object name="table">
         <inherit name="editor_object" />
@@ -35,37 +39,43 @@
         <listchildren />
         <visible type="boolean">false</visible>
         <look>The safe looms like a sentinel, guarding its secrets with an imposing presence. Its steel surface bears the scars of time and attempted break-ins, yet the combination lock remains a daunting puzzle waiting to be solved.</look>
+        <close />
         <object name="gun">
           <inherit name="editor_object" />
           <attr name="feature_usegive" type="boolean">false</attr>
           <take />
           <drop type="boolean">false</drop>
+          <look> The gun lies cold and menacing, its metallic surface reflecting dim light in the dimly lit room. Each detail is meticulously crafted, from the worn grip to the intricately etched barrel, hinting at the power it once wielded.</look>
+          <not_all />
           <ontake type="script">
             msg ("With your safety and resolve in mind, you chose to bring your firearm, recognizing it as a crucial companion on this quest to unearth the truth about your past and the fate of your dear friend.")
           </ontake>
-          <look> The gun lies cold and menacing, its metallic surface reflecting dim light in the dimly lit room. Each detail is meticulously crafted, from the worn grip to the intricately etched barrel, hinting at the power it once wielded.</look>
-          <not_all />
         </object>
         <object name="rusted key">
           <inherit name="editor_object" />
           <take />
           <drop type="boolean">false</drop>
+          <not_all />
+          <look>The rusted key exudes an air of mystery, its jagged edges hinting at a tumultuous past. Layers of corrosion have dulled its once-shiny surface, leaving only a faint glimmer of the metal beneath.</look>
           <ontake type="script">
             if (GetBoolean(new mail, "looked at")) {
               msg ("Its true purpose remains a tantalizing mystery, but a nagging feeling persists—could it potentially unlock a crucial piece of this unfolding puzzle? With uncertainty and curiosity as your guides, you decide to bring the key along, hoping it might reveal its significance as you journey deeper into the enigmatic past of the Sunshine Orphanage.")
             }
           </ontake>
-          <not_all />
-          <look>The rusted key exudes an air of mystery, its jagged edges hinting at a tumultuous past. Layers of corrosion have dulled its once-shiny surface, leaving only a faint glimmer of the metal beneath.</look>
+          <feature_usegive />
+          <selfuseon type="scriptdictionary">
+            <item key="locked door of room 203">
+              openRoomDoor
+            </item>
+          </selfuseon>
+          <use />
         </object>
-      </object>
-      <object name="player">
-        <inherit name="editor_object" />
-        <inherit name="editor_player" />
       </object>
       <object name="new mail">
         <inherit name="editor_object" />
         <visible type="boolean">false</visible>
+        <drop type="boolean">false</drop>
+        <take type="boolean">false</take>
         <look type="script">
           msg ("You slowly unfold the letter, and its contents read, \"Hello, perhaps you don't know me. But don't you want to know what happened to your childhood friend? Come to the address on the back to uncover the truth—provided you have the courage.\"")
           msg ("Memories of your childhood friend rush back. He was your closest confidant during your lonely and pitiful life in the orphanage. The two of you shared secrets, dreams, and moments of solace amid the stark surroundings. Then, one fateful day, he vanished without a trace—a memory etched deeply into your heart, even though nobody believed your story or lent an ear to your pleas for help. The orphanage, it seemed, was destined for doom, eventually succumbing to a devastating fire that erased any remaining trace of your friend. ")
@@ -74,11 +84,11 @@
           MakeObjectVisible (safe)
           msg ("Thankfully, you are well-acquainted with the password to your safe. With confidence, you anticipate finding both the gun and the enigmatic rusted key safely stored inside.")
         </look>
-        <drop type="boolean">false</drop>
-        <take type="boolean">false</take>
       </object>
       <exit alias="out" to="Abandoned Building">
         <runscript />
+        <locked type="boolean">false</locked>
+        <visible />
         <script type="script">
           if (not GetBoolean(new mail, "looked at")) {
             msg ("As a detective, you rarely venture out without an intriguing case to pursue. The stack of letters in the room might just offer you a compelling reason to leave. ")
@@ -91,13 +101,17 @@
               if (not Got(rusted key)) {
                 msg ("You think you should take the rusted key with you, even though its purpose remains a mystery.")
               }
+              else {
+                MoveObject (player, Abandoned Building)
+              }
             }
-            MoveObject (player, Abandoned Building)
           }
         </script>
-        <locked type="boolean">false</locked>
-        <visible />
       </exit>
+      <object name="player">
+        <inherit name="editor_object" />
+        <inherit name="editor_player" />
+      </object>
     </object>
     <object name="Abandoned Building">
       <inherit name="editor_room" />
@@ -105,11 +119,277 @@
       <usedefaultprefix type="boolean">false</usedefaultprefix>
       <prefix>an</prefix>
       <beforeenter type="script">
-        msg ("You called a cab, and went on this quest.")
+        picture ("abandonedBuilding.png")
+        msg ("Before you stands the hulking silhouette of Sunshine Orphanage. Its charred façade and years of neglect are evident in every cracked brick and weathered windowpane. While the fire at the orphanage erased much of your childhood from memory, a flicker of nostalgia tugs at your heartstrings. The sight of this old building triggers a rush of fleeting, happy memories with your childhood friend, juxtaposed by the harsh reality of his unexplained disappearance.")
       </beforeenter>
       <enter type="script">
-        msg ("Here is the sunshine or")
       </enter>
+      <object name="mailbox">
+        <inherit name="editor_object" />
+        <inherit name="container_closed" />
+        <feature_container />
+        <close type="boolean">false</close>
+        <hidechildren />
+        <listchildren />
+        <look>This weathered, rusty mailbox has seen better days. Its once-vibrant colors have faded, and scorch marks tell the tale of a past fire. It stands with a slight tilt, a silent sentinel bearing the scars of time and turmoil.</look>
+        <object name="burnt key">
+          <inherit name="editor_object" />
+          <look>Nestled within the burnt, old mailbox, you discover a key that has endured the ravages of time and fire. Its once-gleaming surface is now tarnished, and the key bears signs of heat damage. It exudes an air of mystery, hinting at its potential to unlock the secrets hidden behind the scorched front door.</look>
+          <take />
+          <drop type="boolean">false</drop>
+          <feature_usegive />
+          <use />
+          <usemenuprompt type="string"></usemenuprompt>
+          <selfuseon type="scriptdictionary">
+            <item key="front door">
+              openFrontDoor
+            </item>
+          </selfuseon>
+        </object>
+      </object>
+      <object name="front door">
+        <inherit name="editor_object" />
+        <look>The imposing front door, constructed from thick, solid wood, bears the scars of a ferocious blaze. Its surface is charred and blistered, with the remnants of ornate carvings barely visible through the soot. Despite its formidable appearance, the door now stands as a somber sentinel to the past.</look>
+        <feature_usegive />
+        <useon type="scriptdictionary">
+          <item key="rusted key">
+            msg ("You decide to test the rusted key's compatibility with the front door, sliding it into the lock with cautious optimism. However, as you turn the key, there's a distinct feeling of resistance, and the door remains firmly sealed. It appears that this key is not the one to unlock the mysteries that lie beyond this scorched threshold.")
+          </item>
+          <item key="gun">
+            msg ("The idea briefly crosses your mind—why not use your trusty firearm to open this obstinate door? After all, there's a certain elegance in the simplicity of brute force. However, the thought of preserving your precious bullets quickly deters you from pursuing this aggressive approach. It might be wise to consider a more resourceful alternative.")
+          </item>
+          <item key="burnt key">
+            if (Got(burnt key)) {
+              openFrontDoor
+            }
+            else {
+              msg ("The key is inside the mailbox. Take it to use it.")
+            }
+          </item>
+        </useon>
+        <shoot type="scriptdictionary">
+          <item key="gun">
+            msg ("The thought of preserving your precious bullets quickly deters you from pursuing this aggressive approach.")
+          </item>
+        </shoot>
+      </object>
+      <exit alias="in" to="Entrance Hall">
+        <inherit name="indirection" />
+        <runscript />
+        <script type="script">
+          if (GetBoolean(front door, "opened")) {
+            MoveObject (player, Entrance Hall)
+          }
+          else {
+            msg ("The front door is locked.")
+          }
+        </script>
+      </exit>
+    </object>
+    <object name="Entrance Hall">
+      <inherit name="editor_room" />
+      <beforeenter type="script">
+        picture ("entranceHall.png")
+        msg ("As you cautiously step into the entrance hall of the abandoned building, a grim tableau unfolds before you. The atmosphere is heavy with the weight of time's passage. A sense of desolation permeates the air, and the dim light barely illuminates the eerie scene.")
+      </beforeenter>
+      <object name="reception desk">
+        <inherit name="editor_object" />
+        <look>Your gaze then falls upon a burnt reception desk, a once-proud centerpiece of this hall, now reduced to charred remnants. The scorched wood and melted remnants of paperwork are haunting reminders of a past catastrophe.</look>
+      </object>
+      <object name="dead body">
+        <inherit name="editor_object" />
+        <look type="script">
+          msg ("In the heart of the hall, an unsettling sight unfolds—a lifeless figure sprawled upon the floor, a wretched, homeless soul. Tattered clothing clings to a frail frame, skin marked by the harshness of life on unforgiving streets, and vacant eyes that speak volumes of despair. The hobo's tragic fate appears to be the cruel result of coldness and hunger, a poignant testament to the hardships endured within this forsaken place.")
+          msg ("As you cautiously draw near, compelled by morbid curiosity, you notice something intriguing. Beneath the lifeless form lies a half-burnt diary, its pages curling from the flames but still bearing secrets from the past.")
+          MakeObjectVisible (diary)
+        </look>
+      </object>
+      <exit alias="east" to="Hallway">
+        <inherit name="eastdirection" />
+      </exit>
+      <object name="walking stick">
+        <inherit name="editor_object" />
+        <visible />
+        <take />
+        <look>The aged walking stick, marked by the scars of time, stands resolute beside the wall. Its polished wood has aged gracefully into a welcoming, well-worn patina. A thought crosses your mind—perhaps it could prove handy for breaking things if the need arises.</look>
+        <drop type="boolean">false</drop>
+      </object>
+      <object name="diary">
+        <inherit name="editor_object" />
+        <visible type="boolean">false</visible>
+        <look><![CDATA[Carefully, you reach under the lifeless form of the hobo and retrieve a dusty, weathered diary. Its pages, though yellowed with age, hold the secrets of a bygone era, chronicled by a young boy who once called this orphanage home. As you flip through the brittle pages, the words of the diary unfold a chilling narrative of the past.<br/><br/>The author, a former resident of the Sunshine Orphanage, reveals a heart-wrenching account of relentless bullying that plagued the children during that time. The pages resonate with tales of torment, cruelty, and the harsh realities of their daily lives. A sense of desperation and hopelessness permeates each word, painting a grim picture of the past.<br/><br/>The diary goes on to describe the oppressive environment that forced the children into factory labor, their innocence robbed as they toiled in a world that seemed devoid of compassion. The memories recorded within its pages resonate with a growing sense of familiarity, as if the words themselves were pulling at the threads of your own forgotten past.<br/><br/>As you delve deeper into the diary's entries, you feel the stirrings of long-buried memories clawing their way to the surface. It's as though the boy's words have ignited a spark, illuminating the dark corners of your own recollections, revealing the truth about your childhood friend and the tragic events that transpired here at the Sunshine Orphanage. With each page turned, the fog of amnesia slowly dissipates, and you inch closer to uncovering the answers you've sought for so long.]]></look>
+        <drop type="boolean">false</drop>
+      </object>
+    </object>
+    <object name="Hallway">
+      <inherit name="editor_room" />
+      <beforeenter type="script">
+        picture ("hallway.png")
+        msg ("As you step into what remains of a corridor within the orphanage, designated as the \"200s,\" the grim aftermath of the fire becomes evident. Most of the rooms have been reduced to ash and ruins. However, a solitary locked door bearing the number 203 still stands before you, a relic from the past. A spark of recognition ignites within you, a vivid memory reminding you that your own room was once marked with the very same number.")
+      </beforeenter>
+      <exit alias="west" to="Entrance Hall">
+        <inherit name="westdirection" />
+      </exit>
+      <object name="locked door of room 203">
+        <inherit name="editor_object" />
+        <drop type="boolean">false</drop>
+        <break type="scriptdictionary">
+          <item key="walking stick">
+            msg ("You muster all your strength and determination, wielding the sturdy walking stick like a makeshift battering ram. With a resounding thud, you strike the door, hoping to force it open. However, the door remains obstinate, its resilience unyielding to your efforts. It seems that this approach won't lead you any further, and you'll need to explore other avenues to uncover the mysteries concealed beyond this barrier.")
+          </item>
+        </break>
+        <shoot type="scriptdictionary">
+          <item key="gun">
+            msg ("The thought briefly crosses your mind – using your trusty firearm to forcefully open the door. It's a tempting notion, the sheer power at your disposal. But then, a more prudent instinct prevails. The value of each precious bullet weighs on your conscience, and you decide against expending them in such a hasty manner. It's best to conserve your resources and explore alternative methods to access what lies beyond this door.")
+          </item>
+        </shoot>
+        <feature_usegive />
+        <useon type="scriptdictionary">
+          <item key="rusted key">
+            openRoomDoor
+          </item>
+        </useon>
+        <look>This door, marked with the number 203, stands as an imposing barrier. Its surface is weathered with age, and the tarnished doorknob hints at a history of countless turns. The door's solid frame exudes an air of mystery, concealing the secrets that lie beyond.</look>
+      </object>
+      <exit alias="in" to="Room 203">
+        <inherit name="indirection" />
+        <runscript />
+        <script type="script">
+          if (GetBoolean(locked door of room 203, "opened")) {
+            MoveObject (player, Room 203)
+          }
+          else {
+            msg ("The door is locked.")
+          }
+        </script>
+      </exit>
+    </object>
+    <object name="Room 203">
+      <inherit name="editor_room" />
+      <beforeenter type="script">
+        picture ("room.png")
+        msg ("Room 203, a haunting vestige of the past, carries the weight of bygone memories within its timeworn walls. As you unlock the door and enter, you're greeted by a scene frozen in time. The room, though marred by the ravages of the fire, still retains a semblance of its former self.")
+        msg ("Sunlight filters weakly through partially curtained windows, casting feeble rays upon remnants of a once-cozy sanctuary. The charred remnants of a bed frame stand as solemn sentinels, their scorched wood testifying to the ferocity of the flames. Tattered remnants of children's drawings cling to the walls, faded but still conveying the innocence of those who once inhabited this space.")
+      </beforeenter>
+      <exit alias="out" to="Hallway">
+        <inherit name="outdirection" />
+      </exit>
+      <exit name="an openning" alias="down" to="Dungeon">
+        <inherit name="downdirection" />
+        <runscript />
+        <script type="script">
+          if (GetBoolean(openning, "broke")) {
+            MoveObject (player, Dungeon)
+          }
+          else {
+            msg ("You can't do that.")
+          }
+        </script>
+        <visible type="boolean">false</visible>
+      </exit>
+      <object name="heavy mirror">
+        <inherit name="editor_object" />
+        <break type="scriptdictionary">
+          <item key="walking stick">
+            msg ("With a determined swing, you attempt to shatter the heavy mirror using the sturdy walking stick. However, despite your best efforts, the mirror remains unbroken. The wood of the walking stick vibrates in your hand, but the mirror's surface holds firm, as if it guards its secrets with an unyielding resolve. It appears that brute force alone won't be enough to penetrate the mysteries it conceals. You might need to explore other avenues to unlock the truth within.")
+          </item>
+        </break>
+        <shoot type="scriptdictionary">
+          <item key="gun">
+            msg ("With a resounding blast, you pull the trigger of your firearm, sending a bullet crashing into the heavy mirror. The glass shatters, scattering shards in all directions, and the echoes of the gunshot reverberate through the room.")
+            msg ("Amidst the shattered glass, you spot an unexpected revelation—a concealed opening in the floor, previously obscured by the mirror's imposing presence.")
+            SetObjectFlagOn (heavy mirror, "shot")
+            RemoveObject (heavy mirror)
+            MakeObjectVisible (openning)
+          </item>
+        </shoot>
+        <look>The mirror, once a grand fixture, now bears scars from a past fire. Its ornate frame, charred and twisted, frames a reflective surface marred with darkened streaks. Despite its tarnished appearance, the mirror retains an enigmatic allure, seemingly holding the whispers of forgotten reflections.</look>
+      </object>
+      <object name="openning">
+        <inherit name="editor_object" />
+        <visible type="boolean">false</visible>
+        <look>The shadowy void within the wooden floorboards called out to me, its enigmatic secrets veiled beneath the layers of time and neglect. It became evident that, in order to widen the opening for entry, some forceful action might be necessary, perhaps even breaking through the aged wood that guarded the passage below.</look>
+        <break type="scriptdictionary">
+          <item key="walking stick">
+            msg ("With a determined resolve, I gripped the sturdy walking stick and raised it high above the narrow opening in the floorboards. With a powerful swing, I brought it down with all my might, feeling the resistance of aged wood as it splintered and cracked. The once-restricted passage widened, revealing a path into the unknown. It was a satisfying moment of triumph, as the ancient barricade yielded to my persistence, and I prepared to descend into the enigmatic depths below.")
+            msg ("You may go down now.")
+            MakeExitVisible (an openning)
+            SetObjectFlagOn (openning, "broke")
+          </item>
+        </break>
+      </object>
+    </object>
+    <object name="Dungeon">
+      <inherit name="editor_room" />
+      <beforeenter type="script">
+        picture ("dungeon.png")
+        msg ("In the corner, a small, burnt teddy bear with a split head lies abandoned, a testament to the passage of time and the cherished memories it once held. Despite the room's scars, there's an eerie sense of nostalgia, as if the whispers of laughter and secrets shared within these walls refuse to fade entirely.")
+      </beforeenter>
+      <object name="teddy bear">
+        <inherit name="editor_object" />
+        <look type="script">
+          msg ("This cherished teddy bear, worn from years of love and affection, now bears a visible scar—a head split at the seam. Its button eyes gaze out with a mix of innocence and weariness, while its plush body shows signs of countless hugs and adventures. The split serves as a poignant reminder of the passage of time and the enduring bond between a child and their cherished companion.")
+          SetObjectFlagOn (teddy bear, "looked")
+        </look>
+        <take />
+        <ontake type="script">
+          msg ("As I carefully picked up the tattered, burnt teddy bear from the corner of Room 203, memories began to flood my mind, like long-lost echoes of a distant past. It was an overwhelming sensation, as if my very identity were unraveling before me.")
+          msg ("The teddy bear, with its head split, felt strangely familiar in my hands. It was then that I realized the truth—the only friend I had during my time at the Sunshine Orphanage wasn't a human companion, but this stuffed bear. I had clung to it through the darkest days of my childhood, seeking solace and comfort in its presence.")
+          msg ("The memories, which had long been concealed by the protective veil of my subconscious, now surged forth with undeniable clarity. There was no childhood friend who had mysteriously disappeared; it had been me and my teddy bear, facing the cruelty of the orphanage and the relentless bullying alone. The fire that had destroyed the orphanage was not the result of some sinister conspiracy; it had been a tragic accident, one that had claimed the lives of many innocent children and caregivers.")
+          msg ("My mind had woven an intricate web of lies to shield me from the painful truth, creating a fictional friend and a sinister mystery to protect me from the trauma of my past. The teddy bear, with its split head, had always been there as my silent confidant, absorbing my tears and fears, offering the warmth of companionship when no one else would.")
+          msg ("With the weight of this revelation settling in, I was overcome by a profound sense of closure and acceptance. The truth, although undeniably painful, had liberated me from the shackles of false memories and the haunting specter of unanswered questions.")
+          msg ("In this newfound clarity, I felt compelled to take a symbolic step forward, to bid farewell to the past that had held me captive for so long. To do this, I decided that it was time to part with the teddy bear, a cherished but bittersweet relic of my childhood. The act of burning it would serve as a poignant farewell, a final gesture of letting go and embracing the unvarnished truth.")
+        </ontake>
+        <burn type="script">
+          if (GetBoolean(teddy bear, "looked")) {
+            RemoveObject (teddy bear)
+            msg ("With the teddy bear now reduced to ashes, its poignant presence forever etched in my memory, I felt an overwhelming sense of release. The flames had consumed not just a cherished childhood companion but also the shadows of false narratives that had held me captive for so long. In their place, a newfound clarity and acceptance filled the void, like the first rays of dawn after a long, dark night.")
+            msg ("As I walked away from the remnants of Room 203, the abandoned orphanage, and the past I had sought to uncover, I carried with me the weight of experience and the wisdom of self-discovery. The journey had been arduous, the revelations painful, but the truth had set me free. With every step, I moved forward into an uncertain future, leaving behind the ghosts of the past, knowing that I was finally unburdened and ready to embrace whatever lay ahead.")
+            finish
+          }
+          else {
+            msg ("You want to take a look at it first.")
+          }
+        </burn>
+      </object>
     </object>
   </object>
+  <verb>
+    <property>shoot</property>
+    <pattern>shoot</pattern>
+    <defaultexpression>"You can't shoot " + object.article + "."</defaultexpression>
+  </verb>
+  <verb>
+    <property>break</property>
+    <pattern>break</pattern>
+    <defaultexpression>"You can't break " + object.article + "."</defaultexpression>
+  </verb>
+  <verb>
+    <property>burn</property>
+    <pattern>burn</pattern>
+    <defaultexpression>"You can't burn " + object.article + "."</defaultexpression>
+  </verb>
+  <function name="openFrontDoor">
+    if (GetBoolean(front door, "opened")) {
+      msg ("You've opened the door. ")
+    }
+    else {
+      SetObjectFlagOn (front door, "opened")
+      msg ("With a mix of trepidation and determination, you take the burnt and weathered key you found from the mailbox and approach the heavy, scorched front door. The key slides into the lock with a hesitant ease, fitting snugly despite its aged appearance. You turn the key slowly, feeling the resistance give way to a satisfying click.")
+      msg ("With a gentle push, the door groans open, revealing a world obscured by time and tragedy. As you step across the threshold, the creaking of the door echoes in the stillness, marking the beginning of your journey into the heart of the mysteries that lie within.")
+      RemoveObject (burnt key)
+    }
+  </function>
+  <function name="openRoomDoor">
+    if (GetBoolean(locked door of room 203, "opened")) {
+      msg ("You've opened the door. ")
+    }
+    else {
+      SetObjectFlagOn (locked door of room 203, "opened")
+      msg ("The key slides into the lock with a hesitant ease, fitting snugly despite its aged appearance. You turn the key slowly, feeling the resistance give way to a satisfying click.")
+      msg ("With a gentle push, the door groans open, revealing a world obscured by time and tragedy. ")
+      RemoveObject (rusted key)
+      RemoveObject (locked door of room 203)
+    }
+  </function>
 </asl>
